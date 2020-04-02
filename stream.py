@@ -59,24 +59,35 @@ class PlaylistParser():
     def get_channels(self):
         return self.channels
 
-# Managing the command line arguments
-parser = argparse.ArgumentParser()
-parser.add_argument("-file", help="Name of the .m3u file with extension")
-args = parser.parse_args()
+class Helper():
+    def __init__(self):
+        pass
 
-# Getting the current version info
-def update():
-    curr_ver = None
-    with open("version.txt", "r") as version_file:
-        curr_ver = float(version_file.readline().split("=")[-1])
-        print("Version : ", curr_ver)
-    response = urllib.request.urlopen("https://raw.githubusercontent.com/monuyadav016/Live-TV/master/version.txt").read
-    new_ver = float(response.split("=")[-1])
-    print("Latest version availble: ", new_ver)
-    print("Updating...")
-    if new_ver > curr_ver:
-        with open("version.txt", "w") as version_file:
-            version_file.wirte(new_ver)
+    # Managing the command line arguments
+    def arg_manager(self):
+        parser = argparse.ArgumentParser()
+        parser.add_argument("-file", help="Name of the .m3u file with extension")
+        args = parser.parse_args()
+        return args
+
+    # Getting the current version info and update if available
+    def update_version(self):
+        print("Updating...")
+        curr_ver = None
+        with open("version.txt", "r") as version_file:
+            curr_ver = float(version_file.readline().split("=")[-1])
+            print("Current version : ", curr_ver)
+        response = urllib.request.urlopen("""
+            https://raw.githubusercontent.com/monuyadav016/Live-TV/master/version.txt""").read().decode()
+        new_ver = float(response.split("=")[-1])
+        print("Latest version available: ", new_ver)
+        if new_ver > curr_ver:
+            with open("version.txt", "w") as version_file:
+                version_file.wirte(new_ver)
+
+helper = Helper()
+helper.update_version()
+args = helper.arg_manager()
 
 if args.file is None:
     print("No filename provided using default file India.m3u")
