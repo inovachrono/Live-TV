@@ -53,7 +53,11 @@ class PlaylistParser():
     def list_channels(self):
         print("List of channels available are: ")
         for i, channel in enumerate(self.channels, 1):
-            print(i, channel.get("name"))
+            if i % 3 == 0:
+                print("{0}: {1}".format(i, channel.get("name")).ljust(26))
+            else:
+                print("{0}: {1}".format(i, channel.get("name")).ljust(26), end=" ")
+        print()
     
     # Returns the list of channels with {name, link}
     def get_channels(self):
@@ -66,7 +70,7 @@ class Helper():
     # Managing the command line arguments
     def arg_manager(self):
         parser = argparse.ArgumentParser()
-        parser.add_argument("-file", help="Name of the .m3u file with extension")
+        parser.add_argument("-f", "--file", help="Name of the .m3u file with extension")
         args = parser.parse_args()
         return args
 
@@ -83,7 +87,7 @@ class Helper():
         print("Latest version available: ", new_ver)
         if new_ver > curr_ver:
             with open("version.txt", "w") as version_file:
-                version_file.wirte(new_ver)
+                version_file.write("VERSION = {0}".format(new_ver))
 
 helper = Helper()
 helper.update_version()
@@ -96,12 +100,23 @@ playlist = PlaylistParser()
 playlist.parse_m3u(args.file)
 playlist.list_channels()
 channels = playlist.get_channels()
-channel_no = int(input("Enter the channel number: "))
-if channel_no > 0:
+
+choice = "n"
+error = False
+while choice not in ["y", "yes", "q", "quit"]:
     try:
+        channel_no = int(input("Enter the channel number: "))
+        if channel_no < 1:
+            raise ValueError
         channel = channels[channel_no - 1]
         subprocess.run(["vlc", channel["link"]])
+    except ValueError:
+        print("INVALID CHANNEL NUMBER")
+        error = True
+        quit()
     except Exception as e:
         print(e)
-else:
-    print("Invalid channel No")
+    finally:
+        if not error:
+            choice = input("Press q or quit to EXIT or Enter to continue: ").lower()
+print("Exiting...\n")

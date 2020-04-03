@@ -1,5 +1,6 @@
 # Source
 .vscode/
+in.m3u
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
